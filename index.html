@@ -4,10 +4,8 @@
     <meta charset="utf-8">
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>API Reference</title>
+    <title>MYLE API Reference</title>
 
-    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
-    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
     <style>
       .highlight table td { padding: 5px; }
 .highlight table pre { margin: 0; }
@@ -88,10 +86,12 @@
   color: #90a959;
 }
     </style>
+    <link href="stylesheets/screen.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print.css" rel="stylesheet" media="print" />
       <script src="javascripts/all.js"></script>
   </head>
 
-  <body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;]">
+  <body class="index" data-languages="[&quot;javascript&quot;]">
     <a href="#" id="nav-button">
       <span>
         NAV
@@ -101,9 +101,7 @@
     <div class="tocify-wrapper">
       <img src="images/logo.png" />
         <div class="lang-selector">
-              <a href="#" data-language-name="shell">shell</a>
-              <a href="#" data-language-name="ruby">ruby</a>
-              <a href="#" data-language-name="python">python</a>
+              <a href="#" data-language-name="javascript">javascript</a>
         </div>
         <div class="search">
           <input type="text" class="search" id="input-search" placeholder="Search">
@@ -119,228 +117,431 @@
     <div class="page-wrapper">
       <div class="dark-box"></div>
       <div class="content">
-        <h1 id="introduction">Introduction</h1>
+        
+          <h1 id="introduction">Introduction</h1>
 
-<p>Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.</p>
+<p>The MYLE API uses HTTP methods and a RESTful endpoint structure. The API authorization framework is <a href="https://github.com/hueniverse/oz">Oz</a>. You format requests in JSON and the APIs return JSON-formatted responses.</p>
 
-<p>We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.</p>
+          <h1 id="mylet">Mylet</h1>
 
-<p>This example API documentation page was created with <a href="https://github.com/tripit/slate">Slate</a>. Feel free to edit it and use it as a base for your own API&rsquo;s documentation.</p>
+<h2 id="what-is-a-mylet">What is a mylet?</h2>
 
-<h1 id="authentication">Authentication</h1>
+<p>A mylet is a web app that can be run in context of user&rsquo;s MYLE account in smart-phone and in browser and also perform some server code.</p>
+
+<p>Hosting of a mylet is responsibility of the mylet&rsquo;s developer.</p>
+
+<p>You can think of a mylet as of a tool that transforms user&rsquo;s data into desired output. Users install mylets through MYLE market.</p>
+
+<h2 id="registering-a-mylet-within-myle">Registering a mylet within MYLE</h2>
+
+<p>Registering a mylet is as easy as a couple of clicks:</p>
+
+<ol>
+<li>Go to <a href="https://dev.getmyle.com">https://dev.getmyle.com</a></li>
+<li>Click <code class="prettyprint">Create mylet</code> button</li>
+<li>Provide title for the mylet and click <code class="prettyprint">Create</code> button</li>
+<li>Provide mylet details</li>
+</ol>
+
+<p>In order to integrate with MYLE, a mylet exposes two URLs:</p>
+
+<ol>
+<li>UI URL - to present a mylet to a user</li>
+<li>Hook URL - to notify a mylet about an event on MYLE side</li>
+</ol>
+
+          <h1 id="authentication">Authentication</h1>
 
 <blockquote>
-<p>To authorize, use this code:</p>
+<p>Example of a mylet URL request</p>
 </blockquote>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
+<pre class="highlight plaintext"><code>https://mymylet.example.com/ui?session=&lt;A SESSION TOKEN&gt;
+</code></pre>
 
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
+<p>There are two cases when your mylet execution is triggered by MYLE:</p>
 
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="s2">"api_endpoint_here"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
+<ol>
+<li>A user navigates to the mylet&rsquo;s URL</li>
+<li>An event happens related to the mylet, so mylet&rsquo;s hook URL is requested</li>
+</ol>
+
+<p>Both of these cases have a <code class="prettyprint">session</code> query parameter supplied. Your mylet exchanges the <a href="#session-token">session token</a> for a <a href="#user-ticket">user ticket</a> and uses the latter to access user&rsquo;s data.</p>
+
+<h2 id="session-token">Session token</h2>
+
+<p>Both UI and hook mylet URLs are supplied with a <code class="prettyprint">session</code> query parameter. The session token is valid for an hour and is exchanged for a <a href="#user-ticket">user ticket</a>.</p>
+
+<p>The exchange is done using <a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a> and pursues two goals:</p>
+
+<ol>
+<li>To make sure that a mylet request is triggered by MYLE</li>
+<li>To generate a <a href="#user-ticket">user ticket</a> that is used to authenticate subsequent MYLE API calls</li>
+</ol>
+
+<p>A session token is converted into a <a href="#user-ticket">user ticket</a>.</p>
+
+<h2 id="user-ticket">User ticket</h2>
 
 <blockquote>
-<p>Make sure to replace <code class="prettyprint">meowmeowmeow</code> with your API key.</p>
-</blockquote>
-
-<p>Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our <a href="http://example.com/developers">developer portal</a>.</p>
-
-<p>Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
-
-<p><code class="prettyprint">Authorization: meowmeowmeow</code></p>
-
-<aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
-</aside>
-
-<h1 id="kittens">Kittens</h1>
-
-<h2 id="get-all-kittens">Get All Kittens</h2>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span>
-</code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</code></pre>
-<pre class="highlight shell"><code>curl <span class="s2">"http://example.com/api/kittens"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">[</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fluffums"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calico"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-    </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre>
-
-<p>This endpoint retrieves all kittens.</p>
-
-<h3 id="http-request">HTTP Request</h3>
-
-<p><code class="prettyprint">GET http://example.com/api/kittens</code></p>
-
-<h3 id="query-parameters">Query Parameters</h3>
-
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Default</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>include_cats</td>
-<td>false</td>
-<td>If set to true, the result will also include cats.</td>
-</tr>
-<tr>
-<td>available</td>
-<td>true</td>
-<td>If set to false, the result will include kittens that have already been adopted.</td>
-</tr>
-</tbody></table>
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-<h2 id="get-a-specific-kitten">Get a Specific Kitten</h2>
-<pre class="highlight ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
+<p>Example of a user ticket</p>
 </blockquote>
 <pre class="highlight json"><code><span class="p">{</span><span class="w">
-  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+    </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1478832837390</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"app"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.mymylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mylet"</span><span class="p">],</span><span class="w">
+    </span><span class="nt">"grant"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-6b18XP5TDwlp9RxOhfZv4-5Zvm1n_LQ"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"algorithm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"ext"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"dbs"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2e2ed05a-4f63-4850-9297-5b8384397dd0"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;A TICKET IDENTIFIER&gt;"</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
 
-<p>This endpoint retrieves a specific kitten.</p>
+<p>In order to be able to request user&rsquo;s data you first have to receive <a href="https://github.com/hueniverse/oz#ticket-response">a user ticket</a> based on a <a href="#session-token">session token</a> and mylet credentials. <a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code></a> endpoint is used for that.</p>
 
-<aside class="warning">Inside HTML code blocks like this one, you can&rsquo;t use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+<p>Generated user ticket is valid for an hour and at any time can be exchanged for a new one using <a href="#refresh-user-ticket"><code class="prettyprint">/v1/ticket/refresh</code></a> endpoint. You can check its <code class="prettyprint">exp</code> property for expiration (that is time in milliseconds since <code class="prettyprint">1970-01-01</code>).</p>
 
-<h3 id="http-request">HTTP Request</h3>
+<p>A user ticket is used to generate a request <a href="#authorization-header"><code class="prettyprint">Authorization</code> header</a>.</p>
 
-<p><code class="prettyprint">GET http://example.com/kittens/&lt;ID&gt;</code></p>
+<h2 id="authorization-header">Authorization header</h2>
+<pre class="highlight javascript"><code><span class="kr">const</span> <span class="nx">Hawk</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'hawk'</span><span class="p">);</span>
 
-<h3 id="url-parameters">URL Parameters</h3>
+<span class="c1">// example mylet credentials</span>
+<span class="kr">const</span> <span class="nx">myletCred</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"com.example.mymylet"</span><span class="p">,</span>
+    <span class="s2">"key"</span><span class="p">:</span> <span class="s2">"DacoNO/pKaigvMJqzh86vX71j7y6cwAl"</span><span class="p">,</span>
+    <span class="s2">"algorithm"</span><span class="p">:</span> <span class="s2">"sha256"</span>
+<span class="p">};</span>
+
+<span class="c1">// function that calculates Hawk authorization header</span>
+<span class="kd">function</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">credentials</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kr">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">credentials</span><span class="p">:</span> <span class="nx">credentials</span><span class="p">,</span>
+        <span class="na">app</span><span class="p">:</span> <span class="nx">credentials</span><span class="p">.</span><span class="nx">app</span>
+    <span class="p">};</span>
+    <span class="k">return</span> <span class="nx">Hawk</span><span class="p">.</span><span class="nx">client</span><span class="p">.</span><span class="nx">header</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// example of an authorization header for '/v1/ticket' endpoint</span>
+<span class="kd">let</span> <span class="nx">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">Authorization</span><span class="p">:</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="s1">'https://api.getmyle.com/v1/ticket'</span><span class="p">,</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="nx">myletCred</span><span class="p">).</span><span class="nx">field</span>
+<span class="p">};</span>
+
+<span class="c1">// example of an authorization header for `/v1/query` endpoint</span>
+<span class="nx">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">Authorization</span><span class="p">:</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="s1">'https://api.getmyle.com/v1/query'</span><span class="p">,</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="nx">getUserTicket</span><span class="p">()).</span><span class="nx">field</span>
+<span class="p">}</span>
+</code></pre>
+
+<p><code class="prettyprint">Authorization</code> header is required to be included with a request to MYLE API server. That is generated based on URL and method of the request as well as HAWK credentials specific to the request endpoint. The credentials are one of the two types:</p>
+
+<ol>
+<li><p>Mylet credentials</p>
+
+<p>That is only required for <a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a>. That consists of a mylet ID and a secret key. See example on the right.</p></li>
+<li><p><a href="#user-ticket">User ticket</a></p>
+
+<p>That is required for any other API endpoints.</p></li>
+</ol>
+
+<p><a href="https://github.com/hueniverse/hawk">Hawk</a> is used to generate an authorization request header. That is NodeJS library. Other platform <a href="https://github.com/hueniverse/hawk/blob/master/README.md#implementations">implementations</a> are also available:</p>
+
+<ul>
+<li><a href="https://github.com/logibit/logibit.hawk/">.NET - Logibit Hawk</a></li>
+<li><a href="https://github.com/tent/hawk-ruby">Ruby - Tent Hawk</a></li>
+<li><a href="https://github.com/wealdtech/hawk">Java - Wealdtech</a></li>
+<li><a href="https://github.com/kumar303/mohawk/">Python - Kumar&rsquo;s Mohawk</a></li>
+<li><a href="https://github.com/hiyosi/hawk">Go - Hiyosi</a></li>
+<li><a href="https://github.com/dflydev/dflydev-hawk">PHP - Dflydev</a></li>
+</ul>
+
+          <h1 id="errors">Errors</h1>
+
+<p>MYLE uses conventional HTTP response codes to indicate the success or failure of an API request. In general, codes in the 2xx range indicate success, codes in the 4xx range indicate an error that failed given the information provided (e.g., a required parameter was omitted, etc.), and codes in the 5xx range indicate an error with MYLE&rsquo;s servers.</p>
+
+<h3 id="error-response-attributes">Error response attributes</h3>
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Attribute</th>
 <th>Description</th>
 </tr>
 </thead><tbody>
 <tr>
-<td>ID</td>
-<td>The ID of the kitten to retrieve</td>
+<td>statusCode</td>
+<td>The HTTP status code (typically 4xx or 5xx)</td>
+</tr>
+<tr>
+<td>error</td>
+<td>The HTTP status message (e.g. <code class="prettyprint">Bad Request</code>, <code class="prettyprint">Internal Server Error</code>) derived from statusCode</td>
+</tr>
+<tr>
+<td>message</td>
+<td>The error message if specified</td>
 </tr>
 </tbody></table>
 
-          <h1 id="errors">Errors</h1>
-
-<aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files&hellip;just save them to the `includes` folder and add them to the top of your `index.md`&rsquo;s frontmatter. Files are included in the order listed.</aside>
-
-<p>The Kittn API uses the following error codes:</p>
+<h3 id="status-codes">Status codes</h3>
 
 <table><thead>
 <tr>
-<th>Error Code</th>
+<th>Status Code</th>
 <th>Meaning</th>
 </tr>
 </thead><tbody>
 <tr>
+<td>200</td>
+<td>OK &ndash; Everything worked as expected</td>
+</tr>
+<tr>
 <td>400</td>
-<td>Bad Request &ndash; Your request sucks</td>
+<td>Bad Request &ndash; The request was unacceptable, often due to missing a required parameter</td>
 </tr>
 <tr>
 <td>401</td>
-<td>Unauthorized &ndash; Your API key is wrong</td>
+<td>Unauthorized &ndash; <code class="prettyprint">Expired ticket</code>, <code class="prettyprint">Mismatching application id</code>, <code class="prettyprint">Invalid application</code>, <code class="prettyprint">Invalid grant</code></td>
 </tr>
 <tr>
 <td>403</td>
-<td>Forbidden &ndash; The kitten requested is hidden for administrators only</td>
+<td>Forbidden &ndash; The request is authenticated but does not have the necessary permissions for the resource</td>
 </tr>
 <tr>
 <td>404</td>
-<td>Not Found &ndash; The specified kitten could not be found</td>
-</tr>
-<tr>
-<td>405</td>
-<td>Method Not Allowed &ndash; You tried to access a kitten with an invalid method</td>
-</tr>
-<tr>
-<td>406</td>
-<td>Not Acceptable &ndash; You requested a format that isn&rsquo;t json</td>
-</tr>
-<tr>
-<td>410</td>
-<td>Gone &ndash; The kitten requested has been removed from our servers</td>
-</tr>
-<tr>
-<td>418</td>
-<td>I&rsquo;m a teapot</td>
-</tr>
-<tr>
-<td>429</td>
-<td>Too Many Requests &ndash; You&rsquo;re requesting too many kittens! Slow down!</td>
+<td>Not Found &ndash;  The requested resource doesn&rsquo;t exist</td>
 </tr>
 <tr>
 <td>500</td>
-<td>Internal Server Error &ndash; We had a problem with our server. Try again later.</td>
+<td>Internal Server Error &ndash; We had a problem with our server; try again later</td>
 </tr>
 <tr>
 <td>503</td>
-<td>Service Unavailable &ndash; We&rsquo;re temporarially offline for maintanance. Please try again later.</td>
+<td>Service Unavailable &ndash; We&rsquo;re temporarially offline for maintanance; try again later</td>
 </tr>
 </tbody></table>
+
+          <h1 id="ticket">Ticket</h1>
+
+<h2 id="get-user-ticket">Get user ticket</h2>
+<pre class="highlight javascript"><code><span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'request'</span><span class="p">);</span>
+
+<span class="kr">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="s1">'POST'</span><span class="p">,</span>
+    <span class="na">url</span><span class="p">:</span> <span class="s1">'https://api.getmyle.com/v1/ticket'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">Authorization</span><span class="p">:</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="s1">'https://api.getmyle.com/v1/ticket'</span><span class="p">,</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="nx">getMyletCredentials</span><span class="p">()).</span><span class="nx">field</span>
+    <span class="p">},</span>
+    <span class="na">json</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">session</span><span class="p">:</span> <span class="nx">getSessionToken</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">request</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">userTicket</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">userTicket</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre>
+
+<blockquote>
+<p>Request body structure</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">{</span><span class="w">
+   </span><span class="nt">"session"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;SESSION&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+
+<blockquote>
+<p>Response body structure</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1478832837390</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"app"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.mymylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mylet"</span><span class="p">],</span><span class="w">
+    </span><span class="nt">"grant"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-6b18XP5TDwlp9RxOhfZv4-5Zvm1n_LQ"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"algorithm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"ext"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"dbs"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2e2ed05a-4f63-4850-9297-5b8384397dd0"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;A TICKET IDENTIFIER&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+
+<p>This endpoint issues <a href="#user-ticket">a user ticket</a> for a given <a href="#session-token">session token</a>.</p>
+
+<h3 id="http-request">HTTP Request</h3>
+
+<p><code class="prettyprint">POST https://api.getmyle.com/v1/ticket</code></p>
+
+<h3 id="headers">Headers</h3>
+
+<table><thead>
+<tr>
+<th>Header</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Authorization</td>
+<td><a href="#authorization-header">The authorization header</a> generated by <a href="https://github.com/hueniverse/hawk">Hawk</a> using mylet credentials</td>
+</tr>
+</tbody></table>
+
+<h3 id="request-body">Request body</h3>
+
+<p><a href="#session-token">A session token</a> has to be sent. See example on the right.</p>
+
+<h3 id="response-body">Response body</h3>
+
+<p><a href="#user-ticket">A user ticket</a>.</p>
+
+<h2 id="refresh-user-ticket">Refresh user ticket</h2>
+<pre class="highlight javascript"><code><span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'request'</span><span class="p">);</span>
+
+<span class="kr">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="s1">'POST'</span><span class="p">,</span>
+    <span class="na">url</span><span class="p">:</span> <span class="s1">'https://api.getmyle.com/v1/ticket/reissue'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">Authorization</span><span class="p">:</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="s1">'https://api.getmyle.com/v1/ticket/reissue'</span><span class="p">,</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="nx">getExistingUserTicket</span><span class="p">()).</span><span class="nx">field</span>
+    <span class="p">},</span>
+    <span class="na">json</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">};</span>
+
+<span class="nx">request</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">newUserTicket</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">newUserTicket</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre>
+
+<blockquote>
+<p>Response body structure</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1478832837390</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"app"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.mymylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mylet"</span><span class="p">],</span><span class="w">
+    </span><span class="nt">"grant"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-6b18XP5TDwlp9RxOhfZv4-5Zvm1n_LQ"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"algorithm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"ext"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"dbs"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2e2ed05a-4f63-4850-9297-5b8384397dd0"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;A TICKET IDENTIFIER&gt;"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+
+<p>This endpoint issues another <a href="#user-ticket">user ticket</a>.</p>
+
+<h3 id="http-request">HTTP Request</h3>
+
+<p><code class="prettyprint">POST https://api.getmyle.com/v1/ticket/refresh</code></p>
+
+<h3 id="headers">Headers</h3>
+
+<table><thead>
+<tr>
+<th>Header</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Authorization</td>
+<td><a href="#authorization-header">The authorization header</a> generated by <a href="https://github.com/hueniverse/hawk">Hawk</a> using an existing <a href="#user-ticket">user ticket</a>.</td>
+</tr>
+</tbody></table>
+
+<h3 id="request-body">Request body</h3>
+
+<p>Empty.</p>
+
+<h3 id="response-body">Response body</h3>
+
+<p><a href="#user-ticket">New user ticket</a>.</p>
+
+          <h1 id="query">Query</h1>
+
+<h2 id="execute-query">Execute query</h2>
+<pre class="highlight javascript"><code><span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'request'</span><span class="p">);</span>
+
+<span class="kr">const</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="s1">'POST'</span><span class="p">,</span>
+    <span class="na">url</span><span class="p">:</span> <span class="s1">'https://api.getmyle.com/v1/query'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">Authorization</span><span class="p">:</span> <span class="nx">getHawkHeader</span><span class="p">(</span><span class="s1">'https://api.getmyle.com/v1/query'</span><span class="p">,</span> <span class="s1">'POST'</span><span class="p">,</span> <span class="nx">getUserTicket</span><span class="p">()).</span><span class="nx">field</span>
+    <span class="p">},</span>
+    <span class="na">json</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">sets</span><span class="p">:</span> <span class="p">[</span><span class="s1">'master'</span><span class="p">],</span>
+        <span class="na">take</span><span class="p">:</span> <span class="mi">1</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="nx">request</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">records</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">records</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre>
+
+<blockquote>
+<p>The above request returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3300"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"keyphrase"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2016-11-09T07:23:41.000Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"tzOffset"</span><span class="p">:</span><span class="w"> </span><span class="mi">-420</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"phrase"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Go to meeting tomorrow at 5 PM"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eng-USA"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"longitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"latitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"altitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"isDeleted"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre>
+
+<p>This endpoint executes a query to user mylet records.</p>
+
+<h3 id="http-request">HTTP Request</h3>
+
+<p><code class="prettyprint">POST https://api.getmyle.com/v1/query</code></p>
+
+<h3 id="headers">Headers</h3>
+
+<table><thead>
+<tr>
+<th>Header</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Authorization</td>
+<td>The user ticket generated by <a href="#authorization-header">Hawk</a></td>
+</tr>
+</tbody></table>
+
+<h3 id="payload">Payload</h3>
+
+<p>A <a href="#">JSON query tdb</a>.</p>
+
+<h3 id="response">Response</h3>
+
+<p>zdgd</p>
 
       </div>
       <div class="dark-box">
           <div class="lang-selector">
-                <a href="#" data-language-name="shell">shell</a>
-                <a href="#" data-language-name="ruby">ruby</a>
-                <a href="#" data-language-name="python">python</a>
+                <a href="#" data-language-name="javascript">javascript</a>
           </div>
       </div>
     </div>
