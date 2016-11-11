@@ -124,24 +124,7 @@
 
           <h1 id="mylet">Mylet</h1>
 
-<h2 id="what-is-a-mylet">What is a mylet?</h2>
-
-<p>A mylet is a web app that can be run in context of user&rsquo;s MYLE account in smart-phone and in browser and also perform some server code.</p>
-
-<p>Hosting of a mylet is responsibility of the mylet&rsquo;s developer.</p>
-
-<p>You can think of a mylet as of a tool that transforms user&rsquo;s data into desired output. Users install mylets through MYLE market.</p>
-
-<h2 id="registering-a-mylet-within-myle">Registering a mylet within MYLE</h2>
-
-<p>Registering a mylet is as easy as a couple of clicks:</p>
-
-<ol>
-<li>Go to <a href="https://dev.getmyle.com">https://dev.getmyle.com</a></li>
-<li>Click <code class="prettyprint">Create mylet</code> button</li>
-<li>Provide title for the mylet and click <code class="prettyprint">Create</code> button</li>
-<li>Provide mylet details</li>
-</ol>
+<h2 id="integration-points">Integration points</h2>
 
 <p>In order to integrate with MYLE, a mylet exposes two URLs:</p>
 
@@ -150,12 +133,81 @@
 <li>Hook URL - to notify a mylet about an event on MYLE side</li>
 </ol>
 
+<h2 id="ui-url">UI URL</h2>
+
+<blockquote>
+<p>Example of mylet UI URL</p>
+</blockquote>
+<pre class="highlight plaintext"><code>https://mymylet.example.com/ui?session=&lt;SESSION&gt;
+</code></pre>
+
+<p>Every time a user taps on your mylet to open it up, MYLE calls the mylet&rsquo;s UI URL with <a href="#session-token">a session query parameter</a> attached.</p>
+
+<p>It is a good idea on the mylet&rsquo;s backend to call<a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a> right away to get <a href="#user-ticket">a user ticket</a>. That also ensures that the call was initiated by MYLE backend.</p>
+
+<h2 id="hook-url">Hook URL</h2>
+
+<blockquote>
+<p>Example of mylet hook URL</p>
+</blockquote>
+<pre class="highlight plaintext"><code>https://mymylet.example.com/hook?session=&lt;SESSION&gt;
+</code></pre>
+
+<blockquote>
+<p>Example of hook body</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">{</span><span class="w">
+  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"record.associated"</span><span class="p">,</span><span class="w">
+  </span><span class="nt">"record"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3400</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"raw"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Go to meeting tomorrow at 5 PM"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"phrase"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Go to meeting tomorrow at 5 PM"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2016-11-09T07:23:48.000Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"timezoneOffset"</span><span class="p">:</span><span class="w"> </span><span class="mi">-420</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"location"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"longitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"latitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"altitude"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eng-USA"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nt">"mylet"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"mymylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"rdns"</span><span class="p">:</span><span class="w"> </span><span class="s2">"com.example.mymylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"My Mylet"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"keywords"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"eng-USA"</span><span class="p">:</span><span class="w"> </span><span class="s2">"book"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.0.1"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"build"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+
+<p>Every time there is an event related to a mylet, MYLE calls the mylet&rsquo;s hook URL with <a href="#session-token">a session query parameter</a> attached and a body representing the event.</p>
+
+<p>It is a good idea on the mylet&rsquo;s backend to call <a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a> right away to get <a href="#user-ticket">a user ticket</a>. That also ensures that the call was initiated by MYLE backend.</p>
+
+<h3 id="hook-event-types">Hook event types</h3>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>record.associated</td>
+<td>A record was associated with a mylet (whether by a keyphrase or manually by a user)</td>
+</tr>
+</tbody></table>
+
           <h1 id="authentication">Authentication</h1>
 
 <blockquote>
 <p>Example of a mylet URL request</p>
 </blockquote>
-<pre class="highlight plaintext"><code>https://mymylet.example.com/ui?session=&lt;A SESSION TOKEN&gt;
+<pre class="highlight plaintext"><code>https://mymylet.example.com/ui?session=&lt;SESSION&gt;
 </code></pre>
 
 <p>There are two cases when your mylet execution is triggered by MYLE:</p>
@@ -530,13 +582,222 @@
 </tr>
 </tbody></table>
 
-<h3 id="payload">Payload</h3>
+<h3 id="request-body">Request body</h3>
 
-<p>A <a href="#">JSON query tdb</a>.</p>
+<p>A <a href="#query-request">mylet query</a>.</p>
 
-<h3 id="response">Response</h3>
+<h3 id="response-body">Response body</h3>
 
-<p>zdgd</p>
+<p>A <a href="#query-response">mylet query response</a>.</p>
+
+<h2 id="mylet-query">Mylet query</h2>
+
+<blockquote>
+<p>Example of a mylet query</p>
+</blockquote>
+<pre class="highlight json"><code><span class="p">{</span><span class="w">
+    </span><span class="nt">"sets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"master"</span><span class="p">],</span><span class="w">
+    </span><span class="nt">"where"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nt">"$gte"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2016-11-11"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre>
+
+<p>A mylet query is used to query user records associated with a mylet. A mylet query is represented in JSON format.</p>
+
+<h3 id="query-request">Query request</h3>
+
+<p>Mylet query is a JSON with the folling properties:</p>
+
+<table><thead>
+<tr>
+<th>Property</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>sets</td>
+<td>true</td>
+<td>A set to query from. Must be an array with a single <code class="prettyprint">master</code> element in it</td>
+</tr>
+<tr>
+<td>select</td>
+<td>optional</td>
+<td>An array of <a href="#query-response">fields</a> to select. If not specified, <code class="prettyprint">id</code>, <code class="prettyprint">phrase</code> and <code class="prettyprint">time</code> are selected</td>
+</tr>
+<tr>
+<td>where</td>
+<td>optional</td>
+<td>An object to filter resultset by, see <a href="#query-where-clause">Query <code class="prettyprint">where</code> clause</a> below</td>
+</tr>
+<tr>
+<td>orderBy</td>
+<td>optional</td>
+<td>An array of <a href="#query-response">fields</a> to order by. To specify order direction explictly use <code class="prettyprint">{ &quot;$desc&quot;: &quot;field&quot; }</code> or <code class="prettyprint">{ &quot;$asc&quot;: &quot;field&quot; }</code> aray elements</td>
+</tr>
+<tr>
+<td>skip</td>
+<td>optional</td>
+<td>Skips first number of records.</td>
+</tr>
+<tr>
+<td>take</td>
+<td>optional</td>
+<td>Returns specified number of records. Defaults to <code class="prettyprint">100</code> if not specified. Fallbacks to <code class="prettyprint">100</code> if specified value is greater than <code class="prettyprint">100</code>.</td>
+</tr>
+</tbody></table>
+
+<h3 id="query-where-clause">Query <code class="prettyprint">where</code> clause</h3>
+
+<p>To specify equality condition, use the criteria <code class="prettyprint">{ &lt;field&gt;: &lt;value&gt; }</code> to select all records that contain the <code class="prettyprint">&lt;field&gt;</code> with the specified <code class="prettyprint">&lt;value&gt;</code>.</p>
+
+<p>A criteria can use the property operators to specify a condition. For example, <code class="prettyprint">{ a: { $ne: 1 } }</code> selects all records where property <code class="prettyprint">a</code> not equal to <code class="prettyprint">1</code>.</p>
+
+<p>A compound criteria can specify conditions for more than one field in a record. Implicitly, a logical <code class="prettyprint">AND</code> conjunction connects the clauses of a compound criteria so that the query selects the documents that match all the conditions. For example, <code class="prettyprint">{ a: 1, b: 2 }</code> selects all documents where <code class="prettyprint">a</code> equals to <code class="prettyprint">1</code> <strong>and</strong> <code class="prettyprint">b</code> equals to <code class="prettyprint">2</code>.</p>
+
+<p>Using the <code class="prettyprint">$and</code>, <code class="prettyprint">$or</code> and <code class="prettyprint">$not</code> group operator, you can explicitly specify a compound criteria. For example, <code class="prettyprint">{ $or: [{ a: 1 }, { a: 2 }] }</code> selects all documents where property <code class="prettyprint">a</code> equals to <code class="prettyprint">1</code> or <code class="prettyprint">2</code>.</p>
+
+<p>Supported group operators:</p>
+
+<table><thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+<th>Examples</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">$and</code></td>
+<td>AND</td>
+<td><code class="prettyprint">{ latitude: 4, longitude: 6 }</code> is equal to <code class="prettyprint">{ $and: { latitude: 4, longitude: 6 } }</code> and is equal to <code class="prettyprint">{ $and: [ { latitude: 4 }, { longitude: 6 } ] }</code> and means latitude equals 4 and longitude equals 6</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$or</code></td>
+<td>OR</td>
+<td><code class="prettyprint">{ $or: { latitude: 4, longitude: 6 } }</code> is equal to <code class="prettyprint">{ $or: [ { latitude: 4 }, { longitude: 6 } ] }</code> and means latitude equal 4 or longitude equals 6</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$not</code></td>
+<td>negation</td>
+<td><code class="prettyprint">{ $not: { latitude: 4 } }</code> means latitude not equal to 4; <code class="prettyprint">{ latitude: 4, { $not: { longitude: 6 } } }</code> means latitude equals 4 and longitude not equals to 6</td>
+</tr>
+</tbody></table>
+
+<p>Supported property operators:</p>
+
+<table><thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+<th>Examples</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">$e</code></td>
+<td>equals</td>
+<td><code class="prettyprint">{ latitude: { $e: 4 } }</code> means latitude equals 4 and is the same as <code class="prettyprint">{ latitude: 4 }</code></td>
+</tr>
+<tr>
+<td><code class="prettyprint">$ne</code></td>
+<td>not equal to</td>
+<td><code class="prettyprint">{ latitude: { $ne: 4 } }</code> means latitude not equal to 4</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$gte</code></td>
+<td>greater than or equal to</td>
+<td><code class="prettyprint">{ latitude: { $gte: 4 } }</code> means latitude is greater than or equal to 4</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$gt</code></td>
+<td>greater than</td>
+<td><code class="prettyprint">{ latitude: { $gte: 4 } }</code> means latitude is greater than 4</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$lte</code></td>
+<td>less than or equal to</td>
+<td><code class="prettyprint">{ latitude: { $lte: 4 } }</code> means latitude is less than or equal to 4</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$lt</code></td>
+<td>less than</td>
+<td><code class="prettyprint">{ latitude: { $lt: 4 } }</code> means latitude is less than 4</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$contains</code></td>
+<td>string contains</td>
+<td><code class="prettyprint">{ phrase: { $contains: &quot;test&quot; } }</code> means phrase contains &ldquo;test&rdquo; string. Applicable only to <code class="prettyprint">phrase</code> field</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$startsWith</code></td>
+<td>string starts with</td>
+<td><code class="prettyprint">{ phrase: { $startsWith: &quot;a&quot; } }</code> means phrase starts with &ldquo;a&rdquo; string. Applicable only to <code class="prettyprint">phrase</code> field</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$endsWith</code></td>
+<td>string ends with</td>
+<td><code class="prettyprint">{ phrase: { $endsWith: &quot;a&quot; } }</code> means phrase ends with &ldquo;a&rdquo; string. Applicable only to <code class="prettyprint">phrase</code> field</td>
+</tr>
+<tr>
+<td><code class="prettyprint">$in</code></td>
+<td>is in array</td>
+<td><code class="prettyprint">{ altitude: { $in: [1, 2, 3, 4] } }</code> means altitude has value 1, 2, 3 or 4</td>
+</tr>
+</tbody></table>
+
+<h3 id="query-response">Query response</h3>
+
+<p>Result of a mylet query is an array of objects with the following properties:</p>
+
+<table><thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id</td>
+<td>Record identifier</td>
+</tr>
+<tr>
+<td>phrase</td>
+<td>Record text</td>
+</tr>
+<tr>
+<td>time</td>
+<td>UTC time when a record was added</td>
+</tr>
+<tr>
+<td>keyphrase</td>
+<td>A keyphrase used for record association</td>
+</tr>
+<tr>
+<td>tzOffset</td>
+<td>User&rsquo;s timezone offset on records creation time</td>
+</tr>
+<tr>
+<td>language</td>
+<td>Language code used for recognition, for example, <code class="prettyprint">eng-USA</code></td>
+</tr>
+<tr>
+<td>longitude</td>
+<td>Longitude</td>
+</tr>
+<tr>
+<td>latitude</td>
+<td>Latitude</td>
+</tr>
+<tr>
+<td>altitude</td>
+<td>Altitude</td>
+</tr>
+<tr>
+<td>isDeleted</td>
+<td>Flag indicating whether association with a mylet was deleted or not</td>
+</tr>
+</tbody></table>
 
       </div>
       <div class="dark-box">
