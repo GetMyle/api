@@ -3,7 +3,7 @@
 > Example of a mylet URL request
 
 ```
-https://mymylet.example.com/ui?session=<A SESSION TOKEN>
+https://mymylet.example.com/ui?session=<SESSION>
 ```
 
 There are two cases when your mylet execution is triggered by MYLE:
