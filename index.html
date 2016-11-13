@@ -122,6 +122,15 @@
 
 <p>The MYLE API uses HTTP methods and a RESTful endpoint structure. The API authorization framework is <a href="https://github.com/hueniverse/oz">Oz</a>. You format requests in JSON and the APIs return JSON-formatted responses.</p>
 
+<h2 id="api-hosts">API hosts</h2>
+
+<p>There are two API hosts:</p>
+
+<ol>
+<li><code class="prettyprint">https://api.getmyle.com</code> - production API server</li>
+<li><code class="prettyprint">https://dev.getmyle.com:444</code> - development sandbox</li>
+</ol>
+
           <h1 id="mylet">Mylet</h1>
 
 <h2 id="integration-points">Integration points</h2>
@@ -144,6 +153,13 @@
 <p>Every time a user taps on your mylet to open it up, MYLE calls the mylet&rsquo;s UI URL with <a href="#session-token">a session query parameter</a> attached.</p>
 
 <p>It is a good idea on the mylet&rsquo;s backend to call<a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a> right away to get <a href="#user-ticket">a user ticket</a>. That also ensures that the call was initiated by MYLE backend.</p>
+
+<p>The following query parameters are specified by MYLE:</p>
+
+<ol>
+<li><code class="prettyprint">session</code> - <a href="#session-token">session token</a></li>
+<li><code class="prettyprint">sandbox</code> - is specified when a mylet is executed in sandbox environment. Depending on that you do requests to <a href="#api-hosts">production or sandbox API servers</a>.</li>
+</ol>
 
 <h2 id="hook-url">Hook URL</h2>
 
