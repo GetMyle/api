@@ -204,6 +204,13 @@
 
 <p>It is a good idea on the mylet&rsquo;s backend to call <a href="#get-user-ticket"><code class="prettyprint">/v1/ticket</code> endpoint</a> right away to get <a href="#user-ticket">a user ticket</a>. That also ensures that the call was initiated by MYLE backend.</p>
 
+<p>The following query parameters are specified by MYLE:</p>
+
+<ol>
+<li><code class="prettyprint">session</code> - <a href="#session-token">session token</a></li>
+<li><code class="prettyprint">sandbox</code> - is specified when a mylet is executed in sandbox environment. Depending on that you do requests to <a href="#api-hosts">production or sandbox API servers</a>.</li>
+</ol>
+
 <h3 id="hook-event-types">Hook event types</h3>
 
 <table><thead>
