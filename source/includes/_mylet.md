@@ -19,6 +19,11 @@ Every time a user taps on your mylet to open it up, MYLE calls the mylet's UI UR
 
 It is a good idea on the mylet's backend to call[`/v1/ticket` endpoint](#get-user-ticket) right away to get [a user ticket](#user-ticket). That also ensures that the call was initiated by MYLE backend.
 
+The following query parameters are specified by MYLE:
+
+ 1. `session` - [session token](#session-token)
+ 2. `sandbox` - is specified when a mylet is executed in sandbox environment. Depending on that you do requests to [production or sandbox API servers](#api-hosts).
+
 ## Hook URL
 
 > Example of mylet hook URL
@@ -61,6 +66,12 @@ https://mymylet.example.com/hook?session=<SESSION>
 Every time there is an event related to a mylet, MYLE calls the mylet's hook URL with [a session query parameter](#session-token) attached and a body representing the event.
 
 It is a good idea on the mylet's backend to call [`/v1/ticket` endpoint](#get-user-ticket) right away to get [a user ticket](#user-ticket). That also ensures that the call was initiated by MYLE backend.
+
+The following query parameters are specified by MYLE:
+
+ 1. `session` - [session token](#session-token)
+ 2. `sandbox` - is specified when a mylet is executed in sandbox environment. Depending on that you do requests to [production or sandbox API servers](#api-hosts).
+
 
 ### Hook event types
 
